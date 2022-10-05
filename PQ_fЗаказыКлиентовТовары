@@ -1,0 +1,8 @@
+let
+    Источник = Excel.Workbook(File.Contents(АдресОтчетов & "Заказ клиента (Товары) ЗАА (XLSX).xlsx"), null, true),
+    TDSheet_Sheet = Источник{[Item="TDSheet",Kind="Sheet"]}[Data],
+    #"Обрезанный текст" = Table.TransformColumns(TDSheet_Sheet,{{"Column1", Text.Trim, type text}, {"Column2", Text.Trim, type text}, {"Column3", Text.Trim, type text}}),
+    #"Повышенные заголовки" = Table.PromoteHeaders(#"Обрезанный текст", [PromoteAllScalars=true]),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Повышенные заголовки",{{"Заказ клиента.Номер", type text}, {"Номенклатура.Артикул", type text}, {"Идентификатор строки (РЗД)", type text}, {"Количество (в единицах хранения)", type number}})
+in
+    #"Измененный тип"
