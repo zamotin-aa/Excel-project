@@ -1,0 +1,10 @@
+let
+    Источник = Excel.Workbook(File.Contents("\\Fileserv\Sams\Obmen\ПДО\План производства 2020-2022\Исходные данные ERP\Заказы Ф.1 (XLSX).xlsx"), null, true),
+    TDSheet_Sheet = Источник{[Item="TDSheet",Kind="Sheet"]}[Data],
+    #"Строки с примененным фильтром" = Table.SelectRows(TDSheet_Sheet, each ([Column7] <> null)),
+    #"Повышенные заголовки" = Table.PromoteHeaders(#"Строки с примененным фильтром", [PromoteAllScalars=true]),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Повышенные заголовки",{{"Требуется", Int64.Type}, {"Запланировано", Int64.Type}, {"Передано к производству", Int64.Type}, {"Производится", Int64.Type}, {"Произведено", Int64.Type}, {"Готов к разборке", Int64.Type}, {"Количество записей", Int64.Type}, {"Артикул ", type text}}),
+    #"Удаленные столбцы" = Table.RemoveColumns(#"Измененный тип",{"Column2", "Column3", "Column5", "Готов к разборке", "Количество записей", "Запланировано", "Передано к производству", "Производится", "Номенклатура"}),
+    #"Измененный тип1" = Table.TransformColumnTypes(#"Удаленные столбцы",{{"Распоряжение", type text}, {"Назначение", type text}})
+in
+    #"Измененный тип1"
