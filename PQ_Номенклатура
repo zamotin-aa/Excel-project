@@ -1,0 +1,18 @@
+let
+    Источник = Excel.Workbook(File.Contents("\\Fileserv\Sams\Obmen\ПДО\План производства 2020-2022\Исходные данные ERP\Отчет по номенклатуре (ЗАА) NEW (XLSX).xlsx"), null, true),
+    TDSheet_Sheet = Источник{[Item="TDSheet",Kind="Sheet"]}[Data],
+    #"Строки с примененным фильтром" = Table.SelectRows(TDSheet_Sheet, each ([Column6] <> null)),
+    #"Повышенные заголовки" = Table.PromoteHeaders(#"Строки с примененным фильтром", [PromoteAllScalars=true]),
+    #"Другие удаленные столбцы" = Table.SelectColumns(#"Повышенные заголовки",{"Артикул ", "Номенклатура"}),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Другие удаленные столбцы",{{"Артикул ", type text}, {"Номенклатура", type text}}),
+    #"Сортированные строки" = Table.Sort(#"Измененный тип",{{"Артикул ", Order.Ascending}}),
+    #"Обрезанный текст" = Table.TransformColumns(#"Сортированные строки",{{"Артикул ", Text.Trim, type text}}),
+    #"Удаленные дубликаты" = Table.Distinct(#"Обрезанный текст", {"Артикул "}),
+    #"Очищенный текст" = Table.TransformColumns(#"Удаленные дубликаты",{{"Артикул ", Text.Clean, type text}}),
+    #"Удаленные дубликаты1" = Table.Distinct(#"Очищенный текст", {"Артикул "}),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Удаленные дубликаты1", each not Text.Contains([#"Артикул "], "БРАТЬ")),
+    #"Строки с примененным фильтром2" = Table.SelectRows(#"Строки с примененным фильтром1", each not Text.Contains([#"Артикул "], "ВЫБИРАТЬ")),
+    #"Строки с примененным фильтром3" = Table.SelectRows(#"Строки с примененным фильтром2", each not Text.Contains([#"Артикул "], "брать")),
+    #"Строки с примененным фильтром4" = Table.SelectRows(#"Строки с примененным фильтром3", each not Text.Contains([#"Артикул "], "выбирать"))
+in
+    #"Строки с примененным фильтром4"
