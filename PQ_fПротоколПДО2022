@@ -1,0 +1,8 @@
+let
+    Источник = Excel.Workbook(File.Contents("\\FILESERV\Sams\Obmen\ПДО\План производства 2019-2022\Ф.12.1 2022-2024.xlsx"), null, true),
+    #"2022_Sheet" = Источник{[Item="2022",Kind="Sheet"]}[Data],
+    #"Повышенные заголовки" = Table.PromoteHeaders(#"2022_Sheet", [PromoteAllScalars=true]),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Повышенные заголовки", each ([ЗК] <> null)),
+    #"Измененный тип" = Table.TransformColumnTypes(#"Строки с примененным фильтром",{{"ЗК", type text}, {"Статус", type text}, {"Priority", type text}, {"ВП", type text}, {"Заказчик", type text}, {"Договор", type text}, {"Краткое описание", type text}, {"Статус выполнения", type text}, {"Комментарий по заказу клента", type text}, {"Дата Ф.12.1", type date}, {"Дата исполнения Ф.12.1", type date}, {"Условие выполнения договора", type text}, {"Условия отгрузки", type text}, {"Объект", type text}, {"Дата комплектования (не позднее)", type date}, {"Дата выдачи в ОВ2/СМП", type date}, {"Сдано на СГП", type date}, {"Отгружено с СГП", type date}, {"Доставлено", type date}, {"Документальная реализация", type text}})
+in
+    #"Измененный тип"
