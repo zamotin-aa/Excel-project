@@ -1,0 +1,15 @@
+let
+    Источник = Excel.Workbook(File.Contents("\\FILESERV\Sams\Obmen\ПДО\План производства 2020-2022\Исходные данные ERP\Себестоимость товаров организаций ЗАА today (XLSX).xlsx"), null, true),
+    TDSheet_Sheet = Источник{[Item="TDSheet",Kind="Sheet"]}[Data],
+    #"Измененный тип" = Table.TransformColumnTypes(TDSheet_Sheet,{{"Column1", type text}, {"Column2", type any}, {"Column3", type text}, {"Column4", type any}, {"Column5", type text}, {"Column6", type any}, {"Column7", type text}, {"Column8", type text}, {"Column9", type any}, {"Column10", type any}}),
+    #"Повышенные заголовки" = Table.PromoteHeaders(#"Измененный тип", [PromoteAllScalars=true]),
+    #"Строки с примененным фильтром" = Table.SelectRows(#"Повышенные заголовки", each ([Column4] <> null)),
+    #"Повышенные заголовки1" = Table.PromoteHeaders(#"Строки с примененным фильтром", [PromoteAllScalars=true]),
+    #"Строки с примененным фильтром1" = Table.SelectRows(#"Повышенные заголовки1", each ([Количество] <> null) and ([Себестоимость] <> null)),
+    #"Измененный тип1" = Table.TransformColumnTypes(#"Строки с примененным фильтром1",{{"Артикул", type text}}),
+    #"Сгруппированные строки" = Table.Group(#"Измененный тип1", {"Артикул"}, {{"Количество", each List.Sum([Количество]), type nullable number}, {"Стоимость", each List.Sum([Себестоимость]), type nullable number}}),
+    #"Сортированные строки" = Table.Sort(#"Сгруппированные строки",{{"Артикул", Order.Ascending}}),
+    #"Добавлен пользовательский объект" = Table.AddColumn(#"Сортированные строки", "Цена за шт", each [Стоимость]/[Количество]),
+    #"Измененный тип2" = Table.TransformColumnTypes(#"Добавлен пользовательский объект",{{"Цена за шт", type number}})
+in
+    #"Измененный тип2"
